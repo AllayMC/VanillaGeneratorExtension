@@ -1,55 +1,54 @@
 package io.papermc.paperclip;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import cn.allay.api.datastruct.DynamicURLClassLoader;
+
+import java.io.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class Paperclip {
+    private static String workPath;
 
-    public static void main(final String[] args) {
-        if (Path.of("").toAbsolutePath().toString().contains("!")) {
+    public static void setup(DynamicURLClassLoader loader, final String[] args) {
+        workPath = args[0];
+        File file = Path.of(workPath).toFile();
+        if (!file.exists() || !file.isDirectory()) {
+            System.err.println("The working directory of je generator must be first param!");
+            System.exit(1);
+        }
+
+        if (Path.of(workPath).toAbsolutePath().toString().contains("!")) {
             System.err.println("Paperclip may not run in a directory containing '!'. Please rename the affected folder.");
             System.exit(1);
         }
 
         final URL[] classpathUrls = setupClasspath();
-
-        final ClassLoader parentClassLoader = Paperclip.class.getClassLoader().getParent();
-        final URLClassLoader classLoader = new URLClassLoader(classpathUrls, parentClassLoader);
-
+        for (var url : classpathUrls) {
+            loader.addURL(url);
+        }
         final String mainClassName = findMainClass();
         System.out.println("Starting " + mainClassName);
-
-        final Thread runThread = new Thread(() -> {
-            try {
-                final Class<?> mainClass = Class.forName(mainClassName, true, classLoader);
-                final MethodHandle mainHandle = MethodHandles.lookup()
+        try {
+            final Class<?> mainClass = Class.forName(mainClassName, true, loader);
+            final MethodHandle mainHandle = MethodHandles.lookup()
                     .findStatic(mainClass, "main", MethodType.methodType(void.class, String[].class))
                     .asFixedArity();
-                mainHandle.invoke((Object) args);
-            } catch (final Throwable t) {
-                throw Util.sneakyThrow(t);
-            }
-        }, "ServerMain");
-        runThread.setContextClassLoader(classLoader);
-        runThread.start();
+            mainHandle.invoke((Object) args);
+        } catch (final Throwable t) {
+            throw Util.sneakyThrow(t);
+        }
     }
 
     private static URL[] setupClasspath() {
-        final var repoDir = Path.of(System.getProperty("bundlerRepoDir", ""));
+        final var repoDir = Path.of(System.getProperty("bundlerRepoDir", workPath));
 
         final PatchEntry[] patches = findPatches();
         final DownloadContext downloadContext = findDownloadContext();
@@ -115,9 +114,11 @@ public final class Paperclip {
     private static FileEntry[] findVersionEntries() {
         return findFileEntries("versions.list");
     }
+
     private static FileEntry[] findLibraryEntries() {
         return findFileEntries("libraries.list");
     }
+
     private static FileEntry[] findFileEntries(final String fileName) {
         final InputStream libListStream = Paperclip.class.getResourceAsStream("/META-INF/" + fileName);
         if (libListStream == null) {
@@ -199,12 +200,12 @@ public final class Paperclip {
     }
 
     private static void extractEntries(
-        final Map<String, URL> urls,
-        final PatchEntry[] patches,
-        final Path originalRootDir,
-        final Path repoDir,
-        final FileEntry[] entries,
-        final String targetName
+            final Map<String, URL> urls,
+            final PatchEntry[] patches,
+            final Path originalRootDir,
+            final Path repoDir,
+            final FileEntry[] entries,
+            final String targetName
     ) throws IOException {
         if (entries == null) {
             return;
@@ -219,10 +220,10 @@ public final class Paperclip {
     }
 
     private static void applyPatches(
-        final Map<String, Map<String, URL>> urls,
-        final PatchEntry[] patches,
-        final Path originalJar,
-        final Path repoDir
+            final Map<String, Map<String, URL>> urls,
+            final PatchEntry[] patches,
+            final Path originalJar,
+            final Path repoDir
     ) {
         if (patches.length == 0) {
             return;
