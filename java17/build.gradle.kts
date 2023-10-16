@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     implementation("io.sigpipe:jbsdiff:1.0")
-    compileOnly(files("D:\\idea\\project\\Allay\\Allay-API\\build\\libs\\Allay-API-0.0.1-all.jar"))
+    compileOnly(files("D:\\idea\\project\\Allay\\Allay-API\\build\\libs\\Allay-API-0.0.1-all.jar"))// todo move maven
 }
 
 tasks.shadowJar {
