@@ -25,6 +25,53 @@ java {
     withSourcesJar()
 }
 
+tasks.distTar {
+    enabled = false
+}
+
+tasks.startScripts {
+    enabled = false
+}
+
+tasks.distZip {
+    enabled = false
+}
+
+tasks.startShadowScripts {
+    enabled = false
+}
+
+tasks.shadowDistTar {
+    enabled = false
+}
+
+tasks.shadowDistZip {
+    enabled = false
+}
+
+val shadowJar = tasks.shadowJar {
+    val prefix = "paperclip.libs"
+    listOf("org.apache", "org.tukaani", "io.sigpipe").forEach { pack ->
+        relocate(pack, "$prefix.$pack")
+    }
+
+    exclude("META-INF/LICENSE.txt")
+    exclude("META-INF/NOTICE.txt")
+    archiveClassifier.set("")
+}
+
+val sourcesJar = tasks.named("sourcesJar");
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+}
+
+tasks.register("printVersion") {
+    doFirst {
+        println(version)
+    }
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -36,37 +83,3 @@ publishing {
     }
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
-}
-
-tasks.shadowJar {
-    val prefix = "paperclip.libs"
-    listOf("org.apache", "org.tukaani", "io.sigpipe").forEach { pack ->
-        relocate(pack, "$prefix.$pack")
-    }
-
-    exclude("META-INF/LICENSE.txt")
-    exclude("META-INF/NOTICE.txt")
-    archiveClassifier.set("")
-}
-
-tasks.distTar {
-    enabled = false
-}
-tasks.startScripts {
-    enabled = false
-}
-tasks.distZip {
-    enabled = false
-}
-
-tasks.jar {
-    enabled = false
-}
-
-tasks.register("printVersion") {
-    doFirst {
-        println(version)
-    }
-}
