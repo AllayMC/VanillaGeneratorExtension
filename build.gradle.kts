@@ -40,26 +40,6 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
-tasks.jar {
-    manifest {
-        attributes(
-            "Main-Class" to mainClass
-        )
-    }
-
-    from(file("license.txt")) {
-        into("META-INF/license")
-        rename { "io.papermc.paperclip-LICENSE.txt" }
-    }
-    rename { name ->
-        if (name.endsWith("-LICENSE.txt")) {
-            "META-INF/license/$name"
-        } else {
-            name
-        }
-    }
-}
-
 tasks.shadowJar {
     val prefix = "paperclip.libs"
     listOf("org.apache", "org.tukaani", "io.sigpipe").forEach { pack ->
@@ -68,6 +48,21 @@ tasks.shadowJar {
 
     exclude("META-INF/LICENSE.txt")
     exclude("META-INF/NOTICE.txt")
+    archiveClassifier.set("")
+}
+
+tasks.distTar {
+    enabled = false
+}
+tasks.startScripts {
+    enabled = false
+}
+tasks.distZip {
+    enabled = false
+}
+
+tasks.jar {
+    enabled = false
 }
 
 tasks.register("printVersion") {
