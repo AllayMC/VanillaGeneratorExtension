@@ -6,9 +6,21 @@ plugins {
 
 subprojects {
     apply(plugin = "java")
+    apply(plugin = "maven-publish")
 
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
+    }
+
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                groupId = project.group.toString()
+                artifactId = project.name
+                version = project.version.toString()
+                from(components["java"])
+            }
+        }
     }
 }
 
