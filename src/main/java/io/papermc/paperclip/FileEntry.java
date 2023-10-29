@@ -12,9 +12,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.*;
 
 record FileEntry(byte[] hash, String id, String path) {
 

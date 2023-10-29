@@ -2,36 +2,45 @@ plugins {
     java
     application
     `maven-publish`
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-subprojects {
-    apply(plugin = "java")
-    apply(plugin = "maven-publish")
+repositories {
+    mavenCentral()
+}
 
-    tasks.withType<JavaCompile>().configureEach {
-        options.encoding = "UTF-8"
+dependencies {
+    implementation("io.sigpipe:jbsdiff:1.0")
+    compileOnly(files("src/lib/Allay-API-0.0.1-all.jar"))// todo move maven
+}
+
+val isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
+val mainClass = "io.papermc.paperclip.Main"
+project.setProperty("mainClassName", mainClass)
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
+    withSourcesJar()
+}
 
-    publishing {
-        publications {
-            create<MavenPublication>("maven") {
-                groupId = project.group.toString()
-                artifactId = project.name
-                version = project.version.toString()
-                from(components["java"])
-            }
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+            from(components["java"])
         }
     }
 }
 
-val mainClass = "io.papermc.paperclip.Main"
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+}
 
 tasks.jar {
-    val java17Jar = project(":java17").tasks.named("shadowJar")
-    dependsOn(java17Jar)
-
-    from(zipTree(java17Jar.map { it.outputs.files.singleFile }))
-
     manifest {
         attributes(
             "Main-Class" to mainClass
@@ -40,7 +49,7 @@ tasks.jar {
 
     from(file("license.txt")) {
         into("META-INF/license")
-        rename { "paperclip-LICENSE.txt" }
+        rename { "io.papermc.paperclip-LICENSE.txt" }
     }
     rename { name ->
         if (name.endsWith("-LICENSE.txt")) {
@@ -51,14 +60,15 @@ tasks.jar {
     }
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    val java17Sources = project(":java17").tasks.named("sourcesJar")
-    dependsOn(java17Sources)
-    from(zipTree(java17Sources.map { it.outputs.files.singleFile }))
-    archiveClassifier.set("sources")
-}
+tasks.shadowJar {
+    val prefix = "paperclip.libs"
+    listOf("org.apache", "org.tukaani", "io.sigpipe").forEach { pack ->
+        relocate(pack, "$prefix.$pack")
+    }
 
-val isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
+    exclude("META-INF/LICENSE.txt")
+    exclude("META-INF/NOTICE.txt")
+}
 
 tasks.register("printVersion") {
     doFirst {

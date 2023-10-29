@@ -70,8 +70,8 @@ public final class Paperclip {
 
         final Map<String, Map<String, URL>> classpathUrls = extractAndApplyPatches(baseFile, patches, repoDir);
 
-        // Exit if user has set `paperclip.patchonly` system property to `true`
-        if (Boolean.getBoolean("paperclip.patchonly")) {
+        // Exit if user has set `io.papermc.paperclip.patchonly` system property to `true`
+        if (Boolean.getBoolean("io.papermc.paperclip.patchonly")) {
             System.exit(0);
         }
 
