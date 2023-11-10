@@ -1,6 +1,6 @@
 package io.papermc.paperclip;
 
-import cn.allay.api.datastruct.DynamicURLClassLoader;
+import org.allaymc.api.datastruct.DynamicURLClassLoader;
 
 import java.io.*;
 import java.lang.invoke.MethodHandle;
