@@ -5,5 +5,5 @@ api: [ "2.0.0" ]
 load: STARTUP
 author: CoolLoong
 description: A VanillaGenerator Extension
-website: https://github.com/PowerNukkitX/ExamplePlugin-Maven
+website: https://github.com/AllayMC/VanillaGeneratorExtension
 prefix: "VanillaGeneratorExtension"

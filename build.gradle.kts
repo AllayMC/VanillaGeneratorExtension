@@ -4,6 +4,9 @@ plugins {
     id("io.github.goooler.shadow") version "8.1.7"
 }
 
+project.group = "org.allaymc"
+project.version = "0.0.1"
+
 repositories {
     mavenLocal()
     mavenCentral()
