@@ -1,11 +1,14 @@
 plugins {
     java
     `maven-publish`
+    application
     id("io.github.goooler.shadow") version "8.1.7"
 }
 
 project.group = "org.allaymc"
 project.version = "0.0.1"
+val mainClass = "io.papermc.paperclip.Main"
+project.setProperty("mainClassName", mainClass)
 
 repositories {
     mavenLocal()
@@ -42,6 +45,30 @@ tasks.shadowJar {
     exclude("META-INF/LICENSE.txt")
     exclude("META-INF/NOTICE.txt")
     archiveClassifier.set("")
+}
+
+tasks.distTar {
+    enabled = false
+}
+
+tasks.startScripts {
+    enabled = false
+}
+
+tasks.distZip {
+    enabled = false
+}
+
+tasks.startShadowScripts {
+    enabled = false
+}
+
+tasks.shadowDistTar {
+    enabled = false
+}
+
+tasks.shadowDistZip {
+    enabled = false
 }
 
 val sourcesJar = tasks.named("sourcesJar");
