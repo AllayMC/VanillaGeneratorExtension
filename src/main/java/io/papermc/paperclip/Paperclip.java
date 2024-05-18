@@ -1,12 +1,13 @@
 package io.papermc.paperclip;
 
-import org.allaymc.api.datastruct.DynamicURLClassLoader;
-
 import java.io.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -17,7 +18,15 @@ import java.util.Map;
 public final class Paperclip {
     private static String workPath;
 
-    public static void setup(DynamicURLClassLoader loader, final String[] args) {
+    public static void setup(URLClassLoader loader, final String[] args) {
+        Method addURL;
+        try {
+            addURL = loader.getClass().getDeclaredMethod("addURL", URL.class);
+            addURL.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
         workPath = args[0];
         File file = Path.of(workPath).toFile();
         if (!file.exists() || !file.isDirectory()) {
@@ -32,7 +41,11 @@ public final class Paperclip {
 
         final URL[] classpathUrls = setupClasspath();
         for (var url : classpathUrls) {
-            loader.addURL(url);
+            try {
+                addURL.invoke(loader, url);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
         final String mainClassName = findMainClass();
         System.out.println("Starting " + mainClassName);

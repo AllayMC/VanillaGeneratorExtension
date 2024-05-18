@@ -1,0 +1,9 @@
+name: VanillaGeneratorExtension
+main: com.github.coolloong.pnx.PNXVanillaGeneratorExtension
+version: "1.0.0"
+api: [ "2.0.0" ]
+load: STARTUP
+author: CoolLoong
+description: A VanillaGenerator Extension
+website: https://github.com/PowerNukkitX/ExamplePlugin-Maven
+prefix: "VanillaGeneratorExtension"

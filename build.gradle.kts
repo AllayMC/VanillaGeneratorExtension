@@ -1,55 +1,36 @@
 plugins {
     java
-    application
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.github.goooler.shadow") version "8.1.7"
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
+    maven("https://jitpack.io")
+    maven("https://repo.opencollab.dev/maven-releases/")
+    maven("https://repo.opencollab.dev/maven-snapshots/")
 }
 
 dependencies {
     implementation("io.sigpipe:jbsdiff:1.0")
-    compileOnly(files("src/lib/Allay-API-0.0.1-all.jar"))// todo move maven
+    compileOnly("com.github.PowerNukkitX:PowerNukkitX:master-SNAPSHOT")
 }
 
 val isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
-val mainClass = "io.papermc.paperclip.Main"
-project.setProperty("mainClassName", mainClass)
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
     withSourcesJar()
 }
 
-tasks.distTar {
-    enabled = false
+tasks.wrapper {
+    version = 8.7
 }
 
-tasks.startScripts {
-    enabled = false
-}
-
-tasks.distZip {
-    enabled = false
-}
-
-tasks.startShadowScripts {
-    enabled = false
-}
-
-tasks.shadowDistTar {
-    enabled = false
-}
-
-tasks.shadowDistZip {
-    enabled = false
-}
-
-val shadowJar = tasks.shadowJar {
+tasks.shadowJar {
     val prefix = "paperclip.libs"
     listOf("org.apache", "org.tukaani", "io.sigpipe").forEach { pack ->
         relocate(pack, "$prefix.$pack")
