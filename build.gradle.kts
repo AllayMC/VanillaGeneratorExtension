@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     implementation("io.sigpipe:jbsdiff:1.0")
-    compileOnly("com.github.PowerNukkitX:PowerNukkitX:master-SNAPSHOT")
+    compileOnly("com.github.PowerNukkitX:PowerNukkitX:dcda360364")
 }
 
 val isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
